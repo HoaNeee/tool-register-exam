@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Auto register exam",
+  "version": "1.0.1",
+  "description": "Tool will help you auto register exam for only H",
+  "permissions": [
+    "tabs",
+    "storage",
+    "alarms",
+    "webNavigation",
+    "proxy",
+    "webRequestAuthProvider",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_title": "Mở Dashboard"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "options_page": "index.html",
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  }
+}

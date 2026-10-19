@@ -15,6 +15,6 @@ export class CustomError extends Error {
   }
 }
 
-export function handleExceptionGlobal(error: CustomError) {
+export function handleExceptionGlobal(error: CustomError | unknown) {
   console.log(error);
 }

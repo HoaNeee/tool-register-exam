@@ -1,194 +1,117 @@
-import { KEY_AUTH } from "@/constants/constants";
+import type { IAuth } from "@/types/types";
 import { CustomError } from "./exception";
-import { DB_deleteValue, DB_getValue } from "./storage";
 
-const DOMAIN = "https://hsk.hcmue.edu.vn";
-const BASE_URL = DOMAIN + "/v1/api";
+export const DOMAIN = "https://hsk.hcmue.edu.vn";
+export const BASE_URL = DOMAIN + "/v1/api";
 
 export interface ApiResponse {
-  status: "error" | "success";
-  data: object;
-  message: string;
-  success: boolean;
+	status: "error" | "success";
+	data: object;
+	message: string;
+	success: boolean;
 }
 
 /**
  * This tool maybe use primarily get and post request
  */
 
-async function get(params: string): Promise<ApiResponse> {
-  try {
-    const header = await getAuthHeader();
+async function get(params: string, auth?: IAuth): Promise<ApiResponse> {
+	try {
+		const header = {
+			"Content-Type": "application/json",
+		};
 
-    const response = await fetch(BASE_URL + params, {
-      method: "GET",
-      headers: header,
-    });
+		if (auth?.token) {
+			header["Authorization"] = `Bearer ${auth.token}`;
+		}
+		if (auth?.session?.device_id) {
+			header["X-Device-Id"] = auth.session.device_id;
+		}
 
-    const rawStatus = response.status;
+		const response = await fetch(BASE_URL + params, {
+			method: "GET",
+			headers: header,
+			signal: AbortSignal.timeout(8000),
+		});
 
-    const res = await response.json();
+		const rawStatus = response.status;
 
-    console.log("get response for " + params + ":", res);
+		const res = (await response.json()) as ApiResponse;
 
-    const status = res?.status;
-    if (status !== undefined && status !== null && status === "error") {
-      throw new CustomError(res?.message, rawStatus, status);
-    }
+		console.log("get response for " + params + ":", res);
 
-    const success = res?.success;
-    if (success !== undefined && success !== null && success === false) {
-      throw new CustomError(res?.message, rawStatus, status);
-    }
+		const status = res?.status;
+		if (status !== undefined && status !== null && status === "error") {
+			throw new CustomError(res?.message, rawStatus, status);
+		}
 
-    if (rawStatus >= 400 && rawStatus < 500) {
-      throw new CustomError(res?.message, rawStatus, status);
-    }
+		const success = res?.success;
+		if (success !== undefined && success !== null && success === false) {
+			throw new CustomError(res?.message, rawStatus, status);
+		}
 
-    return res;
-  } catch (error) {
-    handleError(error);
-    throw error;
-  }
+		if (rawStatus >= 400 && rawStatus < 500) {
+			throw new CustomError(res?.message, rawStatus, status);
+		}
+
+		return res;
+	} catch (error) {
+		handleError(error);
+		throw error;
+	}
 }
 
 async function post(
-  params: string,
-  options?: object | null,
-): Promise<ApiResponse> {
-  try {
-    const header = await getAuthHeader();
-    header["Content-Type"] = "application/json";
+	params: string,
+	options?: object | null,
+	auth?: IAuth,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<ApiResponse | any> {
+	try {
+		const header = {};
+		header["Content-Type"] = "application/json";
 
-    const response = await fetch(BASE_URL + params, {
-      method: "POST",
-      headers: header,
-      body: JSON.stringify(options),
-    });
+		if (auth?.token) {
+			header["Authorization"] = `Bearer ${auth.token}`;
+		}
+		if (auth?.session?.device_id) {
+			header["X-Device-Id"] = auth.session.device_id;
+		}
 
-    const res = await response.json();
+		const response = await fetch(BASE_URL + params, {
+			method: "POST",
+			headers: header,
+			body: JSON.stringify(options),
+			signal: AbortSignal.timeout(8000),
+		});
 
-    console.log("post response for " + params + ":", res);
+		const rawStatus = response.status;
 
-    if (!res?.success) {
-      throw new CustomError(res?.code, res?.message);
-    }
-    return res;
-  } catch (error) {
-    handleError(error);
-    throw error;
-  }
-}
+		const res = (await response.json()) as ApiResponse;
 
-async function patch(
-  params: string,
-  options?: object | null,
-): Promise<ApiResponse> {
-  try {
-    const header = await getAuthHeader();
-    header["Content-Type"] = "application/json";
+		console.log("get response for " + params + ":", res);
 
-    const response = await fetch(BASE_URL + params, {
-      method: "PATCH",
-      headers: header,
-      body: JSON.stringify(options),
-    });
+		const status = res?.status;
+		if (status !== undefined && status !== null && status === "error") {
+			throw new CustomError(res?.message, rawStatus, status);
+		}
 
-    const res = await response.json();
+		const success = res?.success;
+		if (success !== undefined && success !== null && success === false) {
+			throw new CustomError(res?.message, rawStatus, status);
+		}
 
-    console.log("patch response for " + params + ":", res);
+		if (rawStatus >= 400 && rawStatus < 500) {
+			throw new CustomError(res?.message, rawStatus, status);
+		}
 
-    if (!res?.success) {
-      throw new CustomError(res?.code, res?.message);
-    }
-    return res;
-  } catch (error) {
-    handleError(error);
-    throw error;
-  }
-}
-
-async function del(params: string): Promise<ApiResponse> {
-  try {
-    const header = await getAuthHeader();
-    header["Content-Type"] = "application/json";
-
-    const response = await fetch(BASE_URL + params, {
-      method: "DELETE",
-      headers: header,
-    });
-
-    const res = await response.json();
-
-    console.log("del response for " + params + ":", res);
-
-    if (!res?.success) {
-      throw new CustomError(res?.code, res?.message);
-    }
-    return res;
-  } catch (error) {
-    handleError(error);
-    throw error;
-  }
-}
-
-async function postImage({
-  params,
-  files,
-  isMultiple = false,
-}: {
-  params: string;
-  files: File[];
-  isMultiple: boolean;
-}): Promise<ApiResponse> {
-  try {
-    const formData = new FormData();
-
-    if (isMultiple) {
-      files.forEach((file) => {
-        formData.append("files", file);
-      });
-    } else {
-      formData.append("file", files[0]);
-    }
-
-    const header = await getAuthHeader();
-
-    const response = await fetch(BASE_URL + params, {
-      method: "POST",
-      headers: header,
-      body: formData,
-    });
-
-    const res = await response.json();
-
-    if (!res?.success) {
-      throw new CustomError(res?.code, res?.message);
-    }
-    return res;
-  } catch (error) {
-    handleError(error);
-    throw error;
-  }
-}
-
-async function getAuthHeader() {
-  const token = await DB_getValue(KEY_AUTH.TOKEN);
-  let header = {};
-  if (token) {
-    header = {
-      //   Authorization: `Bearer ${token}`,
-    };
-  }
-
-  return header;
-}
-
-async function clearAuth() {
-  await DB_deleteValue(KEY_AUTH.TOKEN);
-  location.reload();
+		return res;
+	} catch (error) {
+		handleError(error);
+		throw error;
+	}
 }
 
 function handleError(error: CustomError) {}
 
-export { get, post, patch, del, postImage };
+export { get, post };
