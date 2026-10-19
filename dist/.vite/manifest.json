@@ -5,17 +5,17 @@
     "src": "../../../../../@crx/manifest",
     "isEntry": true
   },
-  "_config-exam-service-wN_lCaYe.js": {
-    "file": "assets/config-exam-service-wN_lCaYe.js",
+  "_config-exam-service-BbnP1Fv-.js": {
+    "file": "assets/config-exam-service-BbnP1Fv-.js",
     "name": "config-exam-service"
   },
   "index.html": {
-    "file": "assets/index.html-td7SIa_7.js",
+    "file": "assets/index.html-CG68trgd.js",
     "name": "index.html",
     "src": "index.html",
     "isEntry": true,
     "imports": [
-      "_config-exam-service-wN_lCaYe.js"
+      "_config-exam-service-BbnP1Fv-.js"
     ],
     "css": [
       "assets/index-evWYdAG-.css"
@@ -49,12 +49,12 @@
     "src": "node_modules/@fontsource-variable/geist/files/geist-vietnamese-wght-normal.woff2"
   },
   "src/background.js": {
-    "file": "assets/background.js-C6aW7k5E.js",
+    "file": "assets/background.js-ftn5nUFe.js",
     "name": "background.js",
     "src": "src/background.js",
     "isEntry": true,
     "imports": [
-      "_config-exam-service-wN_lCaYe.js"
+      "_config-exam-service-BbnP1Fv-.js"
     ]
   }
 }

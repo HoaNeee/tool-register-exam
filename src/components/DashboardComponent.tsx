@@ -389,7 +389,8 @@ export default function DashboardComponent() {
 						{isDeveloperMode && (
 							<Button
 								onClick={async () => {
-									console.log(await chrome.alarms.getAll());
+									const date = "2026-10-19 15:16:00";
+									console.log(schedulerService.getIsInTime(date, 300));
 								}}
 								size={"sm"}
 							>

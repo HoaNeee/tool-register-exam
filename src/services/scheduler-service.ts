@@ -77,10 +77,11 @@ export const schedulerService = {
 	},
 
 	getIsInTime(time: string | number, diff = 2) {
+		console.log(time);
 		time = new Date(time).getTime();
 		const now = Date.now();
 
-		const diffTime = 1000 * 60 * diff; //2s
+		const diffTime = 1000 * diff; //2s
 
 		const res = now - time;
 

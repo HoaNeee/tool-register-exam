@@ -202,7 +202,7 @@ export const configExamService = {
 		//maybe need retry
 		const maxTry = 4;
 
-		const isAutoLoop = await storageService.getIsAutoLoop();
+		let isAutoLoop = await storageService.getIsAutoLoop();
 
 		async function sendMessageUpdateStatus(status: TStatusConfigExam) {
 			await sendMessageFromBackground(
@@ -213,6 +213,7 @@ export const configExamService = {
 
 		async function register(payload: ConfigExamTarget, cntTry = 1) {
 			try {
+				isAutoLoop = await storageService.getIsAutoLoop();
 				await sendMessageUpdateStatus("registering");
 				//simulate error
 				if (payload.id.includes(ID_TEST)) {
@@ -242,8 +243,8 @@ export const configExamService = {
 
 				const isInTimeDiff = schedulerService.getIsInTime(
 					payload.exam_register.ngay_mo_dang_ky,
-					300,
-				); //in time 300s = 5 minutes
+					600,
+				); //in time 600s = 10 minutes
 
 				if ((isAutoLoop && isInTimeDiff) || cntTry < maxTry) {
 					await sendMessageUpdateStatus("error");
